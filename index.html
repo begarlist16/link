@@ -539,7 +539,6 @@ const CONFIG = {
   dataFile:    'links.json',
   clientId:    'Ov23likGe7sy8QOzo4Bn',
   tokenProxy:  'https://young-mouse-8bc7.ufsdgvkxewzwrsnwbxggzbacizp.workers.dev/callback',
-  linkPreviewKey: '25a45edc9a244f3494be997acb4ca405',
 };
 
 /* ─────────────────────────────────────────
@@ -871,7 +870,7 @@ function renderAddForm() {
     submitBtn.textContent = 'Mengambil data…';
     submitBtn.disabled = true;
     try {
-      const apiUrl = `https://api.linkpreview.net/?key=${CONFIG.linkPreviewKey}&q=${encodeURIComponent(url)}`;
+      const apiUrl = `${CONFIG.tokenProxy.replace('/callback', '')}/preview?url=${encodeURIComponent(url)}`;
       const r = await fetch(apiUrl);
       if (!r.ok) throw new Error('LinkPreview error');
       const d = await r.json();
