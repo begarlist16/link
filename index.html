@@ -610,17 +610,11 @@ function updateAuthUI() {
 async function loadLinks() {
   try {
     const r = await fetch(
-      `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}`,
-      {
-        headers: {
-          'Accept': 'application/vnd.github.v3+json',
-          'Cache-Control': 'no-cache',
-        }
-      }
+      `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}`
     );
     if (r.ok) {
       const data = await r.json();
-      const decoded = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
+      const decoded = atob(data.content.replace(/\s/g, ''));
       links = JSON.parse(decoded);
     } else {
       links = [];
