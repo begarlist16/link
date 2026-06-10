@@ -614,7 +614,8 @@ async function loadLinks() {
     );
     if (r.ok) {
       const data = await r.json();
-      const decoded = atob(data.content.replace(/\s/g, ''));
+      const bytes = Uint8Array.from(atob(data.content.replace(/\s/g, '')), c => c.charCodeAt(0));
+      const decoded = new TextDecoder('utf-8').decode(bytes);
       links = JSON.parse(decoded);
     } else {
       links = [];
