@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LinkShelf</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0d0d;
+      --surface:   #161616;
+      --surface2:  #1e1e1e;
+      --border:    #2a2a2a;
+      --border2:   #333;
+      --text:      #e8e8e8;
+      --muted:     #888;
+      --accent:    #4ade80;
+      --accent-dim:#1a3a26;
+      --danger:    #f87171;
+      --radius:    10px;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 28px 24px 0;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .logo {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -.3px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo span { color: var(--accent); }
+
+    #auth-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      padding: 7px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: inherit;
+      transition: border-color .18s, background .18s;
+      white-space: nowrap;
+    }
+    #auth-btn:hover { border-color: var(--accent); background: var(--accent-dim); }
+    #auth-btn img { width: 20px; height: 20px; border-radius: 50%; }
+
+    /* ── Search ── */
+    .search-wrap {
+      max-width: 1200px;
+      margin: 24px auto 0;
+      padding: 0 24px;
+    }
+    .search-inner {
+      position: relative;
+    }
+    .search-inner svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+    #search {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      padding: 11px 14px 11px 40px;
+      border-radius: var(--radius);
+      outline: none;
+      transition: border-color .18s;
+    }
+    #search::placeholder { color: var(--muted); }
+    #search:focus { border-color: var(--accent); }
+
+    /* ── Grid ── */
+    .grid-wrap {
+      max-width: 1200px;
+      margin: 24px auto 48px;
+      padding: 0 24px;
+    }
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    /* ── Add Cell ── */
+    .add-cell {
+      aspect-ratio: 1;
+      background: var(--surface);
+      border: 1.5px dashed var(--border2);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      color: var(--muted);
+      transition: border-color .18s, color .18s, background .18s;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .add-cell:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .add-cell svg { opacity: .7; transition: opacity .18s; }
+    .add-cell:hover svg { opacity: 1; }
+
+    /* ── Link Card ── */
+    .link-card {
+      aspect-ratio: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      transition: border-color .18s, transform .18s;
+      position: relative;
+      text-decoration: none;
+      color: inherit;
+    }
+    .link-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,.4);
+    }
+    .card-thumb {
+      flex: 0 0 58%;
+      background: var(--surface2);
+      overflow: hidden;
+      position: relative;
+    }
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .3s;
+    }
+    .link-card:hover .card-thumb img { transform: scale(1.04); }
+    .card-thumb .thumb-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 28px;
+    }
+    .card-body {
+      flex: 1;
+      padding: 10px 12px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow: hidden;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.35;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-desc {
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card-meta {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-avatar {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--border2);
+    }
+    .card-user {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'Courier New', monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-delete {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0,0,0,.7);
+      border: 1px solid var(--border2);
+      color: var(--danger);
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s;
+      z-index: 2;
+    }
+    .card-delete:hover { background: rgba(248,113,113,.15); }
+    .link-card.own .card-delete { display: flex; }
+
+    /* ── Empty / Loading ── */
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--muted);
+      padding: 60px 0;
+      font-size: 13px;
+    }
+    .spinner {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 420px;
+      margin: 16px;
+      padding: 28px;
+      transform: translateY(8px) scale(.98);
+      transition: transform .2s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+    .modal h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .modal label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .modal input, .modal textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      padding: 9px 12px;
+      border-radius: 7px;
+      outline: none;
+      transition: border-color .15s;
+      margin-bottom: 14px;
+    }
+    .modal textarea { resize: vertical; min-height: 72px; }
+    .modal input:focus, .modal textarea:focus { border-color: var(--accent); }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .btn {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 7px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--border2);
+      color: var(--muted);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--border2); }
+    .btn-primary {
+      background: var(--accent);
+      color: #0d0d0d;
+      border-color: var(--accent);
+    }
+    .btn-primary:hover { background: #86efac; }
+    .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* GitHub sign-in prompt inside modal */
+    .signin-prompt {
+      text-align: center;
+      padding: 10px 0 6px;
+    }
+    .signin-prompt p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 18px;
+      line-height: 1.6;
+    }
+    .btn-github {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .btn-github:hover { border-color: var(--accent); background: var(--accent-dim); }
+
+    .fetch-preview {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      display: none;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .fetch-preview.visible { display: flex; }
+    .fetch-preview img { width: 52px; height: 36px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+    .fetch-preview-info { font-size: 12px; }
+    .fetch-preview-title { font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .fetch-preview-desc { color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      opacity: 0;
+      transition: opacity .2s, transform .2s;
+      z-index: 200;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+    </svg>
+    Link<span>Shelf</span>
+  </div>
+  <button id="auth-btn">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/>
+    </svg>
+    Sign in with GitHub
+  </button>
+</header>
+
+<div class="search-wrap">
+  <div class="search-inner">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input id="search" type="text" placeholder="Search by title or description…" autocomplete="off"/>
+  </div>
+</div>
+
+<div class="grid-wrap">
+  <div id="grid">
+    <div class="add-cell" id="add-btn" title="Add a link">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+      </svg>
+      Add link
+    </div>
+    <div class="empty" id="empty-msg" style="display:none">No links yet. Be the first to add one!</div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal">
+    <h2 id="modal-title">Add a link</h2>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ─────────────────────────────────────────
+   CONFIG — fill these in your repo
+   ───────────────────────────────────────── */
+const CONFIG = {
+  owner:       'YOUR_GITHUB_USERNAME',   // e.g. 'johndoe'
+  repo:        'YOUR_REPO_NAME',         // e.g. 'linkshelf'
+  branch:      'main',
+  dataFile:    'links.json',             // file that stores links in the repo
+  clientId:    'YOUR_GITHUB_OAUTH_APP_CLIENT_ID',
+  // IMPORTANT: GitHub OAuth requires a backend to exchange the code for a token.
+  // Use a free Cloudflare Worker / Netlify Function / Vercel Function.
+  // See README.md for a ready-made Cloudflare Worker snippet.
+  tokenProxy:  'https://YOUR_TOKEN_PROXY_URL/callback',
+};
+
+/* ─────────────────────────────────────────
+   STATE
+   ───────────────────────────────────────── */
+let links   = [];       // [{id, url, title, description, image, user, avatar, createdAt}]
+let user    = null;     // {login, avatar_url, token}
+let query   = '';
+
+/* ─────────────────────────────────────────
+   INIT
+   ───────────────────────────────────────── */
+(async () => {
+  // OAuth callback: ?code=xxx
+  const params = new URLSearchParams(location.search);
+  const code = params.get('code');
+  if (code) {
+    history.replaceState({}, '', location.pathname);
+    await exchangeCode(code);
+  }
+
+  // Restore session
+  const saved = sessionStorage.getItem('gh_user');
+  if (saved) user = JSON.parse(saved);
+  updateAuthUI();
+
+  await loadLinks();
+  renderGrid();
+})();
+
+/* ─────────────────────────────────────────
+   AUTH
+   ───────────────────────────────────────── */
+document.getElementById('auth-btn').addEventListener('click', () => {
+  if (user) {
+    // sign out
+    user = null;
+    sessionStorage.removeItem('gh_user');
+    updateAuthUI();
+    renderGrid();
+    showToast('Signed out');
+  } else {
+    const redirect = encodeURIComponent(location.href.split('?')[0]);
+    location.href = `https://github.com/login/oauth/authorize?client_id=${CONFIG.clientId}&scope=public_repo&redirect_uri=${redirect}`;
+  }
+});
+
+async function exchangeCode(code) {
+  try {
+    const r = await fetch(`${CONFIG.tokenProxy}?code=${code}`);
+    const d = await r.json();
+    if (!d.access_token) throw new Error('No token');
+    const token = d.access_token;
+    const me = await ghGet('https://api.github.com/user', token);
+    user = { login: me.login, avatar_url: me.avatar_url, token };
+    sessionStorage.setItem('gh_user', JSON.stringify(user));
+  } catch(e) {
+    showToast('GitHub sign-in failed');
+  }
+}
+
+function updateAuthUI() {
+  const btn = document.getElementById('auth-btn');
+  if (user) {
+    btn.innerHTML = `<img src="${user.avatar_url}" alt="${user.login}"/> @${user.login} · Sign out`;
+  } else {
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg> Sign in with GitHub`;
+  }
+}
+
+/* ─────────────────────────────────────────
+   LOAD LINKS from GitHub raw JSON
+   ───────────────────────────────────────── */
+async function loadLinks() {
+  try {
+    const url = `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.dataFile}?t=${Date.now()}`;
+    const r = await fetch(url);
+    if (r.ok) links = await r.json();
+    else links = [];
+  } catch { links = []; }
+}
+
+/* ─────────────────────────────────────────
+   SAVE LINKS — commit to GitHub
+   ───────────────────────────────────────── */
+async function saveLinks() {
+  // Get current file SHA (needed to update)
+  let sha = '';
+  try {
+    const info = await ghGet(
+      `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}`,
+      user.token
+    );
+    sha = info.sha;
+  } catch {}
+
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(links, null, 2))));
+  await ghPut(
+    `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}`,
+    user.token,
+    {
+      message: `Update links by @${user.login}`,
+      content,
+      branch: CONFIG.branch,
+      ...(sha ? { sha } : {}),
+    }
+  );
+}
+
+/* ─────────────────────────────────────────
+   RENDER GRID
+   ───────────────────────────────────────── */
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  // remove old cards (keep add-btn)
+  [...grid.querySelectorAll('.link-card, .empty')].forEach(el => el.remove());
+
+  const q = query.toLowerCase();
+  const filtered = links.filter(l =>
+    !q ||
+    (l.title || '').toLowerCase().includes(q) ||
+    (l.description || '').toLowerCase().includes(q)
+  );
+
+  if (filtered.length === 0) {
+    const em = document.createElement('div');
+    em.className = 'empty';
+    em.textContent = q ? 'No links match your search.' : 'No links yet. Be the first to add one!';
+    grid.appendChild(em);
+    return;
+  }
+
+  filtered.forEach(link => {
+    const card = buildCard(link);
+    grid.appendChild(card);
+  });
+}
+
+function buildCard(link) {
+  const isOwn = user && user.login === link.user;
+  const card = document.createElement('a');
+  card.className = 'link-card' + (isOwn ? ' own' : '');
+  card.href = link.url;
+  card.target = '_blank';
+  card.rel = 'noopener noreferrer';
+
+  // thumbnail
+  const thumb = document.createElement('div');
+  thumb.className = 'card-thumb';
+  if (link.image) {
+    const img = document.createElement('img');
+    img.src = link.image;
+    img.alt = link.title || '';
+    img.onerror = () => { img.replaceWith(fallbackThumb(link.url)); };
+    thumb.appendChild(img);
+  } else {
+    thumb.appendChild(fallbackThumb(link.url));
+  }
+
+  // body
+  const body = document.createElement('div');
+  body.className = 'card-body';
+
+  const title = document.createElement('div');
+  title.className = 'card-title';
+  title.textContent = link.title || new URL(link.url).hostname;
+
+  const desc = document.createElement('div');
+  desc.className = 'card-desc';
+  desc.textContent = link.description || '';
+
+  const meta = document.createElement('div');
+  meta.className = 'card-meta';
+  if (link.avatar) {
+    const av = document.createElement('img');
+    av.className = 'card-avatar';
+    av.src = link.avatar;
+    av.alt = link.user;
+    meta.appendChild(av);
+  }
+  const uname = document.createElement('span');
+  uname.className = 'card-user';
+  uname.textContent = '@' + (link.user || 'anonymous');
+  meta.appendChild(uname);
+
+  body.append(title, desc, meta);
+  card.append(thumb, body);
+
+  // delete button (only shown for own cards via CSS)
+  if (isOwn) {
+    const del = document.createElement('button');
+    del.className = 'card-delete';
+    del.title = 'Delete';
+    del.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+    del.addEventListener('click', async e => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!confirm('Remove this link?')) return;
+      links = links.filter(l => l.id !== link.id);
+      renderGrid();
+      try {
+        await saveLinks();
+        showToast('Link removed');
+      } catch {
+        showToast('Save failed — check your config');
+      }
+    });
+    card.appendChild(del);
+  }
+
+  return card;
+}
+
+function fallbackThumb(url) {
+  const div = document.createElement('div');
+  div.className = 'thumb-fallback';
+  try {
+    div.textContent = new URL(url).hostname.slice(0,1).toUpperCase();
+  } catch { div.textContent = '?'; }
+  return div;
+}
+
+/* ─────────────────────────────────────────
+   SEARCH
+   ───────────────────────────────────────── */
+document.getElementById('search').addEventListener('input', e => {
+  query = e.target.value;
+  renderGrid();
+});
+
+/* ─────────────────────────────────────────
+   MODAL
+   ───────────────────────────────────────── */
+const overlay = document.getElementById('modal-overlay');
+const modalBody = document.getElementById('modal-body');
+const modalTitle = document.getElementById('modal-title');
+
+document.getElementById('add-btn').addEventListener('click', openModal);
+overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+function openModal() {
+  modalTitle.textContent = 'Add a link';
+  if (!user) {
+    renderSigninPrompt();
+  } else {
+    renderAddForm();
+  }
+  overlay.classList.add('open');
+}
+
+function closeModal() {
+  overlay.classList.remove('open');
+}
+
+function renderSigninPrompt() {
+  modalBody.innerHTML = `
+    <div class="signin-prompt">
+      <p>Sign in with your GitHub account<br>to add and manage links.</p>
+      <button class="btn-github" id="modal-gh-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>
+        Continue with GitHub
+      </button>
+      <div style="margin-top:16px;">
+        <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-gh-btn').addEventListener('click', () => {
+    const redirect = encodeURIComponent(location.href.split('?')[0]);
+    location.href = `https://github.com/login/oauth/authorize?client_id=${CONFIG.clientId}&scope=public_repo&redirect_uri=${redirect}`;
+  });
+  document.getElementById('modal-cancel').addEventListener('click', closeModal);
+}
+
+function renderAddForm() {
+  let fetchedData = {};
+  let fetching = false;
+
+  modalBody.innerHTML = `
+    <label for="f-url">URL</label>
+    <input id="f-url" type="url" placeholder="https://example.com" autocomplete="off"/>
+    <div class="fetch-preview" id="fetch-preview">
+      <img id="fp-img" src="" alt=""/>
+      <div class="fetch-preview-info">
+        <div class="fetch-preview-title" id="fp-title"></div>
+        <div class="fetch-preview-desc" id="fp-desc"></div>
+      </div>
+    </div>
+    <label for="f-title">Title <span style="color:var(--muted);font-weight:400">(auto-filled)</span></label>
+    <input id="f-title" type="text" placeholder="Page title"/>
+    <label for="f-desc">Description <span style="color:var(--muted);font-weight:400">(auto-filled)</span></label>
+    <textarea id="f-desc" placeholder="Brief description…"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="f-cancel">Cancel</button>
+      <button class="btn btn-primary" id="f-submit" disabled>Save link</button>
+    </div>
+  `;
+
+  const urlInput   = document.getElementById('f-url');
+  const titleInput = document.getElementById('f-title');
+  const descInput  = document.getElementById('f-desc');
+  const submitBtn  = document.getElementById('f-submit');
+  const preview    = document.getElementById('fetch-preview');
+
+  document.getElementById('f-cancel').addEventListener('click', closeModal);
+
+  let debounceTimer;
+  urlInput.addEventListener('input', () => {
+    const val = urlInput.value.trim();
+    submitBtn.disabled = !val;
+    clearTimeout(debounceTimer);
+    if (!isValidUrl(val)) { preview.classList.remove('visible'); return; }
+    debounceTimer = setTimeout(() => fetchPreview(val), 700);
+  });
+
+  async function fetchPreview(url) {
+    fetching = true;
+    submitBtn.textContent = 'Fetching…';
+    submitBtn.disabled = true;
+    try {
+      // Use allorigins to proxy the request and parse OG tags
+      const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      const r = await fetch(proxy);
+      const d = await r.json();
+      const html = d.contents || '';
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const og = (prop) => doc.querySelector(`meta[property="og:${prop}"]`)?.content
+                         || doc.querySelector(`meta[name="${prop}"]`)?.content || '';
+      fetchedData = {
+        title: og('title') || doc.title || '',
+        description: og('description') || '',
+        image: og('image') || '',
+      };
+      if (fetchedData.title) titleInput.value = fetchedData.title;
+      if (fetchedData.description) descInput.value = fetchedData.description;
+      if (fetchedData.image) {
+        document.getElementById('fp-img').src = fetchedData.image;
+        preview.classList.add('visible');
+      }
+      document.getElementById('fp-title').textContent = fetchedData.title;
+      document.getElementById('fp-desc').textContent = fetchedData.description;
+    } catch {}
+    fetching = false;
+    submitBtn.textContent = 'Save link';
+    submitBtn.disabled = false;
+  }
+
+  document.getElementById('f-submit').addEventListener('click', async () => {
+    const url = urlInput.value.trim();
+    if (!isValidUrl(url)) { showToast('Enter a valid URL'); return; }
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving…';
+
+    const newLink = {
+      id:          Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+      url,
+      title:       titleInput.value.trim() || fetchedData.title || url,
+      description: descInput.value.trim()  || fetchedData.description || '',
+      image:       fetchedData.image || '',
+      user:        user.login,
+      avatar:      user.avatar_url,
+      createdAt:   new Date().toISOString(),
+    };
+
+    links.unshift(newLink);
+    renderGrid();
+    closeModal();
+
+    try {
+      await saveLinks();
+      showToast('Link saved ✓');
+    } catch(e) {
+      showToast('Save failed — check repo config');
+      links.shift(); // rollback
+      renderGrid();
+    }
+  });
+}
+
+/* ─────────────────────────────────────────
+   GITHUB API HELPERS
+   ───────────────────────────────────────── */
+async function ghGet(url, token) {
+  const r = await fetch(url, {
+    headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+  });
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+
+async function ghPut(url, token, body) {
+  const r = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      Authorization: `token ${token}`,
+      Accept: 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) {
+    const err = await r.json().catch(() => ({}));
+    throw new Error(err.message || r.status);
+  }
+  return r.json();
+}
+
+/* ─────────────────────────────────────────
+   UTILS
+   ───────────────────────────────────────── */
+function isValidUrl(str) {
+  try { return ['http:','https:'].includes(new URL(str).protocol); }
+  catch { return false; }
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>
