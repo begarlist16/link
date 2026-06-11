@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.github.begarlist16.link",
+      "sha256_cert_fingerprints": [
+        "E8:4B:4A:2E:5C:7A:EB:D7:71:9F:20:1E:76:84:F3:F9:BE:B4:DB:00:56:95:2E:ED:E7:DE:76:59:02:A9:32:3A"
+      ]
+    }
+  }
+]
